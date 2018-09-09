@@ -2,3 +2,4 @@
 my-project.cabal
 .idea/
 *~
+*.iml
