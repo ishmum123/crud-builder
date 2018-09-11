@@ -1,11 +1,32 @@
-module TicTacToe.Logic (leftDiagonal, rightDiagonal, transpose, elemsEqual) where
+module TicTacToe.Logic (leftDiagonal, rightDiagonal, leftDiagonals, rightDiagonals, transpose, elemsEqual) where
 
 -- TODO: Use point free
 leftDiagonal :: [[a]] -> [a]
 leftDiagonal = getDiagonal head tail
 
+leftDiagonals :: [[a]] -> [[a]]
+leftDiagonals [] = []
+leftDiagonals matrix = leftDiagonalsFromAndBelowPrimary matrix
+  ++ (leftDiagonalsFromAndBelowPrimary $ tail $ transpose matrix)
+
+leftDiagonalsFromAndBelowPrimary :: [[a]] -> [[a]]
+leftDiagonalsFromAndBelowPrimary [] = []
+leftDiagonalsFromAndBelowPrimary matrix = leftDiagonal matrix : (leftDiagonalsFromAndBelowPrimary $ tail matrix)
+
 rightDiagonal :: [[a]] -> [a]
 rightDiagonal = getDiagonal last init
+
+rightDiagonals :: [[a]] -> [[a]]
+rightDiagonals [] = []
+rightDiagonals matrix = rightDiagonalsFromAndAbovePrimary matrix ++ (rightDiagonalsFromAndBelowPrimary $ tail matrix)
+
+rightDiagonalsFromAndAbovePrimary :: [[a]] -> [[a]]
+rightDiagonalsFromAndAbovePrimary ([] : _) = []
+rightDiagonalsFromAndAbovePrimary matrix = rightDiagonal matrix : (rightDiagonalsFromAndAbovePrimary $ map init matrix)
+
+rightDiagonalsFromAndBelowPrimary :: [[a]] -> [[a]]
+rightDiagonalsFromAndBelowPrimary [] = []
+rightDiagonalsFromAndBelowPrimary matrix = rightDiagonal matrix : (rightDiagonalsFromAndBelowPrimary $ tail matrix)
 
 getDiagonal :: ([a] -> a) -> ([a] -> [a]) -> [[a]] -> [a]
 getDiagonal _ _ [] = []
