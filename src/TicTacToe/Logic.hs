@@ -1,8 +1,8 @@
-module TicTacToe.Logic (leftDiagonal, rightDiagonal, leftDiagonals, rightDiagonals, transpose, elemsEqual) where
+module TicTacToe.Logic (leftDiagonal, rightDiagonal, leftDiagonals, rightDiagonals, transpose, combinations, validCombinations, elemsEqual) where
 
 -- TODO: Use point free
 leftDiagonal :: [[a]] -> [a]
-leftDiagonal = getDiagonal head tail
+leftDiagonal = diagonal head tail
 
 leftDiagonals :: [[a]] -> [[a]]
 leftDiagonals [] = []
@@ -14,7 +14,7 @@ leftDiagonalsFromAndBelowPrimary [] = []
 leftDiagonalsFromAndBelowPrimary matrix = leftDiagonal matrix : (leftDiagonalsFromAndBelowPrimary $ tail matrix)
 
 rightDiagonal :: [[a]] -> [a]
-rightDiagonal = getDiagonal last init
+rightDiagonal = diagonal last init
 
 rightDiagonals :: [[a]] -> [[a]]
 rightDiagonals [] = []
@@ -28,16 +28,29 @@ rightDiagonalsFromAndBelowPrimary :: [[a]] -> [[a]]
 rightDiagonalsFromAndBelowPrimary [] = []
 rightDiagonalsFromAndBelowPrimary matrix = rightDiagonal matrix : (rightDiagonalsFromAndBelowPrimary $ tail matrix)
 
-getDiagonal :: ([a] -> a) -> ([a] -> [a]) -> [[a]] -> [a]
-getDiagonal _ _ [] = []
-getDiagonal _ _ ([] : _) = []
-getDiagonal singleMember subList matrix = (singleMember $ head matrix)
-  : getDiagonal singleMember subList (map subList $ tail matrix)
+diagonal :: ([a] -> a) -> ([a] -> [a]) -> [[a]] -> [a]
+diagonal _ _ [] = []
+diagonal _ _ ([] : _) = []
+diagonal singleMember subList matrix = (singleMember $ head matrix)
+  : diagonal singleMember subList (map subList $ tail matrix)
 
 transpose :: [[a]] -> [[a]]
 transpose [] = []
 transpose ([] : _) = transpose []
 transpose matrix = map head matrix : (transpose . map tail) matrix
+
+combinations :: [[a]] -> [[a]]
+combinations matrix = foldl1 (++) $ map ($ matrix) [id, transpose, leftDiagonals, rightDiagonals]
+
+validCombinations :: [[a]] -> [[a]]
+validCombinations matrix = foldl1 (++) $ map ($ matrix) [id, transpose, biggestDiagonals . diagonals]
+
+biggestDiagonals :: [[a]] -> [[a]]
+biggestDiagonals matrix = filter (\x -> length x == maxLength matrix) matrix
+  where maxLength matrix' = maximum $ map (\x -> length x) matrix'
+
+diagonals :: [[a]] -> [[a]]
+diagonals matrix = foldl1 (++) $ map ($ matrix) [leftDiagonals, rightDiagonals]
 
 elemsEqual :: Eq a => [a] -> Bool
 elemsEqual [] = True

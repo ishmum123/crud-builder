@@ -2,7 +2,7 @@ module TicTacToe.LogicSpec where
 
 import Test.Hspec (shouldBe, shouldSatisfy, shouldNotSatisfy, shouldMatchList, Spec, it, describe)
 
-import TicTacToe.Logic (leftDiagonal, rightDiagonal, leftDiagonals, rightDiagonals, transpose, elemsEqual)
+import TicTacToe.Logic (leftDiagonal, rightDiagonal, leftDiagonals, rightDiagonals, transpose, combinations, validCombinations, elemsEqual)
 
 -- TODO: Use QuickCheck for randomised testing
 spec :: Spec
@@ -88,6 +88,30 @@ spec = describe "Logic" $ do
 
     it "returns empty for empty list" $ do
       transpose ([] :: [[Int]]) `shouldBe` ([] :: [[Int]])
+
+  describe "combinations" $ do
+    it "returns all possible combinations of 2x2 matrix" $ do
+      combinations [[1, 2], [3, 4]] `shouldMatchList`
+        [[1, 2], [3, 4], [1, 3], [2, 4], [1, 4], [2, 3], [1], [2], [3], [4]]
+
+    it "returns all possible combinations of 3x2 matrix" $ do
+      combinations [[1, 2, 3], [3, 4, 6]] `shouldMatchList`
+        [[1, 2, 3], [3, 4, 6], [1, 3], [2, 4], [3, 6], [1, 4], [2, 6], [3], [3], [3, 4], [2, 3], [1], [6]]
+
+    it "returns empty for empty list" $ do
+      combinations ([] :: [[Int]]) `shouldBe` ([] :: [[Int]])
+
+  describe "validCombinations" $ do
+    it "returns biggest diagonals and rows and columns of 2x2 matrix" $ do
+      validCombinations [[1, 2], [3, 4]] `shouldMatchList`
+        [[1, 2], [3, 4], [1, 3], [2, 4], [1, 4], [2, 3]]
+
+    it "returns biggest diagonals and rows and columns of 3x2 matrix" $ do
+      validCombinations [[1, 2, 3], [3, 4, 6]] `shouldMatchList`
+        [[1, 2, 3], [3, 4, 6], [1, 3], [2, 4], [3, 6], [1, 4], [2, 6], [3, 4], [2, 3]]
+
+    it "returns empty for empty list" $ do
+      validCombinations ([] :: [[Int]]) `shouldBe` ([] :: [[Int]])
 
   describe "elemsEqual" $ do
     it "returns true for 5 equal elems" $ do
