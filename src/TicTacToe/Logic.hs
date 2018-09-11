@@ -1,21 +1,23 @@
-module TicTacToe.Logic (getLeftDiagonal, getRightDiagonal, transpose, allElemsEqual) where
+module TicTacToe.Logic (leftDiagonal, rightDiagonal, transpose, elemsEqual) where
 
 -- TODO: Use point free
-getLeftDiagonal :: [[a]] -> [a]
-getLeftDiagonal = getDiagonal head tail
+leftDiagonal :: [[a]] -> [a]
+leftDiagonal = getDiagonal head tail
 
-getRightDiagonal :: [[a]] -> [a]
-getRightDiagonal = getDiagonal last init
+rightDiagonal :: [[a]] -> [a]
+rightDiagonal = getDiagonal last init
 
 getDiagonal :: ([a] -> a) -> ([a] -> [a]) -> [[a]] -> [a]
 getDiagonal _ _ [] = []
-getDiagonal f1 f2 matrix = (f1 $ head matrix) : getDiagonal f1 f2 (map f2 $ tail matrix)
+getDiagonal _ _ ([] : _) = []
+getDiagonal singleMember subList matrix = (singleMember $ head matrix)
+  : getDiagonal singleMember subList (map subList $ tail matrix)
 
 transpose :: [[a]] -> [[a]]
 transpose [] = []
 transpose ([] : _) = transpose []
 transpose matrix = map head matrix : (transpose . map tail) matrix
 
-allElemsEqual :: Eq a => [a] -> Bool
-allElemsEqual [] = True
-allElemsEqual (x : xs) = and $ map (== x) xs
+elemsEqual :: Eq a => [a] -> Bool
+elemsEqual [] = True
+elemsEqual (x : xs) = and $ map (== x) xs
