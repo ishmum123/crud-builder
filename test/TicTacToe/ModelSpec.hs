@@ -2,7 +2,7 @@ module TicTacToe.ModelSpec where
 
 import Test.Hspec (shouldBe, shouldNotBe, Spec, it, describe)
 
-import TicTacToe.Model (Move(X, Y), Position(..), Board(..), moveAtPosition, positionOfBoard)
+import TicTacToe.Model (Move(X, O), Position(..), Board(..), moveAtPosition, positionOfBoard)
 
 spec :: Spec
 spec = describe "Model" $ do
@@ -12,7 +12,7 @@ spec = describe "Model" $ do
       X `shouldBe` X
 
     it "is not equal if symbols are different" $ do
-      X `shouldNotBe` Y
+      X `shouldNotBe` O
 
   describe "moveAtPosition" $ do
     it "returns a move if available" $ do
