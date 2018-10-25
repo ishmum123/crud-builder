@@ -1,40 +1,74 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module TicTacToe.ModelSpec where
 
 import Test.Hspec (shouldBe, shouldNotBe, Spec, it, describe)
+import Data.Aeson (decode, encode)
+import Prelude hiding (max)
 
-import TicTacToe.Model (Move(X, O), Position(..), Board(..), moveAtPosition, positionOfBoard, getBoardOfLength)
+import TicTacToe.Model
 
 spec :: Spec
 spec = describe "Model" $ do
 
-  describe "Move" $ do
-    it "is equal if symbols are equal" $ do
-      X `shouldBe` X
+  describe "Relation" $ do
+    it "creates relations correctly" $ do
+      (decode "{\"referer\":\"user.status\",\"referenced\": \"status\"}" :: Maybe Relation)
+      `shouldBe` Just Relation {referer="user.status", referenced="status"}
 
-    it "is not equal if symbols are different" $ do
-      X `shouldNotBe` O
+    it "creates relations correctly with unordered data" $ do
+      (decode "{\"referenced\": \"status\", \"referer\":\"user.status\"}" :: Maybe Relation)
+      `shouldBe` Just Relation {referer="user.status", referenced="status"}
 
-  describe "moveAtPosition" $ do
-    it "returns a move if available" $ do
-      moveAtPosition (Position $ Just X) `shouldBe` Just X
+    it "does not parse ill-formed json (colon missing)" $ do
+      (decode "{\"referer\":\"user.status\",\"referenced\" \"status\"}" :: Maybe Relation)
+      `shouldBe` Nothing
 
-    it "returns nothing if a move is not available" $ do
-      moveAtPosition (Position $ Nothing) `shouldBe` Nothing
+    it "does not parse data-missing json" $ do
+      (decode "{\"referenced\": \"status\"}" :: Maybe Relation)
+      `shouldBe` Nothing
 
-  -- TODO: Use type safe way to access board
-  describe "positionOfBoard" $ do
-    it "returns the respective position at board" $ do
-       positionOfBoard (Board ([[Position $ Nothing]])) 0 0 `shouldBe` (Position $ Nothing)
+  describe "Column" $ do
+    it "creates columns correctly" $ do
+      (decode "{\"type\":\"string\",\"name\": \"name\",\"constraints\": [\"unique\", \"non-null\"], \
+        \\"default\": \"hello\", \"max\": 4}" :: Maybe Column)
+      `shouldBe` Just Column {ctype="string", cname="name", constraints=Just ["unique", "non-null"],
+        cdefault=Just "hello", max=Just 4}
 
-  describe "getBoardOfLength" $ do
-    it "returns a board of 4 positions with nothing in them" $ do
-       getBoardOfLength 2 `shouldBe` Board [[Position $ Nothing, Position $ Nothing], [Position $ Nothing, Position $ Nothing]]
+    it "creates columns correctly with missing non-required data" $ do
+      (decode "{\"type\":\"string\",\"name\": \"name\"}" :: Maybe Column)
+      `shouldBe` Just Column {ctype="string", cname="name", constraints=Nothing, cdefault=Nothing, max=Nothing}
 
-    it "returns a board of 9 positions with nothing in them" $ do
-       getBoardOfLength 3 `shouldBe` Board [[Position $ Nothing, Position $ Nothing, Position $ Nothing],
-                                              [Position $ Nothing, Position $ Nothing, Position $ Nothing],
-                                                [Position $ Nothing, Position $ Nothing, Position $ Nothing]]
+  describe "Table" $ do
+    it "creates tables correctly with multiple columns" $ do
+      (decode "{\"type\":\"entity\",\"name\": \"user\",\
+        \\"columns\": [{\"type\":\"string\",\"name\": \"name\"}, \
+        \{\"type\":\"string\",\"name\": \"email\"}]}" :: Maybe Table)
+      `shouldBe` Just Table {ttype="entity", tname="user",
+        columns=[Column {ctype="string", cname="name", constraints=Nothing, cdefault=Nothing, max=Nothing},
+                  Column {ctype="string", cname="email", constraints=Nothing, cdefault=Nothing, max=Nothing}]}
 
-    it "returns a board of 0 positions" $ do
-       getBoardOfLength 0 `shouldBe` Board []
+    it "does not create table with ill-defined column description (column type missing)" $ do
+      (decode "{\"type\":\"entity\",\"name\": \"user\",\
+        \\"columns\": [{\"name\": \"name\"}, {\"name\": \"email\"}]}" :: Maybe Table)
+      `shouldBe` Nothing
 
+    -- TODO: Should not create table with no columns
+    {-it "creates tables correctly with no columns" $ do
+      (decode "{\"type\":\"entity\",\"name\": \"user\",\"columns\": []}" :: Maybe Table)
+      `shouldBe` Nothing-}
+
+  describe "Database" $ do
+    it "creates database correctly" $ do
+      (decode "{\"tables\": [{\"type\":\"entity\",\"name\": \"user\",\
+         \\"columns\": [{\"type\":\"string\",\"name\": \"name\"}, \
+           \{\"type\":\"string\",\"name\": \"email\"}]}]}" :: Maybe Database)
+      `shouldBe` Just Database {tables=[Table {ttype="entity", tname="user",
+                  columns=[Column {ctype="string", cname="name", constraints=Nothing, cdefault=Nothing, max=Nothing},
+                    Column {ctype="string", cname="email", constraints=Nothing, cdefault=Nothing, max=Nothing}]}],
+                  relations=Nothing}
+
+    -- TODO: Should not create database with no tables
+    {-it "creates tables correctly with no columns" $ do
+      (decode "{\"tables\": []}" :: Maybe Database)
+      `shouldBe` Nothing-}

@@ -2,8 +2,6 @@
 
 module Main where
 
-import TicTacToe.Model (getBoardOfLength)
-
 main :: IO ()
 main = do
   putStrLn "Please enter the length of the board: "

@@ -1,17 +1,53 @@
-module TicTacToe.Model (Move(..), Position(..), Board(..), moveAtPosition, positionOfBoard, getBoardOfLength) where
+{-# LANGUAGE DeriveGeneric, OverloadedStrings, DeriveAnyClass #-}
 
-data Move = X | O deriving (Eq, Show)
+module TicTacToe.Model (Relation(..), Column(..), Table(..), Database(..)) where
 
-data Position = Position (Maybe Move) deriving (Eq, Show)
+import Data.Text (Text)
+import GHC.Generics (Generic)
+import Data.Aeson (FromJSON, Value(Object), parseJSON, (.:), (.:?))
 
-data Board = Board [[Position]] deriving (Eq, Show)
+data Relation = Relation
+  {
+    referer :: Text
+  , referenced :: Text
+  } deriving (Show, Generic, Eq, FromJSON)
 
-moveAtPosition :: Position -> Maybe Move
-moveAtPosition (Position x) = x
+-- type & default are haskell key-words
+-- using ctype & cdefault instead
+data Column = Column
+  {
+    ctype :: Text
+  , cname :: Text
+  , constraints :: Maybe [Text]
+  , cdefault :: Maybe Text
+  , max :: Maybe Int
+  } deriving (Show, Generic, Eq)
 
-positionOfBoard :: Board -> Int -> Int -> Position
-positionOfBoard (Board board) row column = board !! row !! column
+instance FromJSON Column where
+ parseJSON (Object v) =
+    Column <$> v .: "type"
+           <*> v .: "name"
+           <*> v .:? "constraints"
+           <*> v .:? "default"
+           <*> v .:? "max"
 
-getBoardOfLength :: Int -> Board
-getBoardOfLength 0 = Board []
-getBoardOfLength len = Board . replicate len . replicate len . Position $ Nothing
+-- duplicate declarations of name
+-- using cname & tname instead
+data Table = Table
+  {
+    ttype :: Text
+  , tname :: Text
+  , columns :: [Column]
+  } deriving (Show, Generic, Eq)
+
+instance FromJSON Table where
+ parseJSON (Object v) =
+    Table <$> v .: "type"
+           <*> v .: "name"
+           <*> v .: "columns"
+
+data Database = Database
+  {
+    tables :: [Table]
+  , relations :: Maybe [Relation]
+  } deriving (Show, Generic, Eq, FromJSON)
