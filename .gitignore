@@ -1,5 +1,5 @@
 .stack-work/
-my-project.cabal
+crud-builder.cabal
 .idea/
 *~
 *.iml

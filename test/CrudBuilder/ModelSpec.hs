@@ -1,12 +1,12 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module TicTacToe.ModelSpec where
+module CrudBuilder.ModelSpec where
 
 import Test.Hspec (shouldBe, shouldNotBe, Spec, it, describe)
 import Data.Aeson (decode, encode)
 import Prelude hiding (max)
 
-import TicTacToe.Model
+import CrudBuilder.Model
 
 spec :: Spec
 spec = describe "Model" $ do

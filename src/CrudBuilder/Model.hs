@@ -1,6 +1,6 @@
 {-# LANGUAGE DeriveGeneric, OverloadedStrings, DeriveAnyClass #-}
 
-module TicTacToe.Model (Relation(..), Column(..), Table(..), Database(..)) where
+module CrudBuilder.Model (Relation(..), Column(..), Table(..), Database(..)) where
 
 import Data.Text (Text)
 import GHC.Generics (Generic)
