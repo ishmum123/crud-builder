@@ -1,0 +1,35 @@
+{
+  "tables": [
+    {
+      "type": "entity",
+      "name": "user",
+      "columns": [
+        {
+          "type": "string",
+          "name": "name"
+        },
+        {
+          "type": "string",
+          "name": "email"
+        }
+      ]
+    },
+    {
+      "type": "enum",
+      "name": "status",
+      "columns": [
+        {
+          "type": "string",
+          "name": "name",
+          "max": 10
+        }
+      ]
+    }
+  ],
+  "relations": [
+    {
+      "referer": "user.status",
+      "referenced": "status"
+    }
+  ]
+}
