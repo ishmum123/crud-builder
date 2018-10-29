@@ -4,3 +4,4 @@ crud-builder.cabal
 *~
 *.iml
 out/
+test/out/

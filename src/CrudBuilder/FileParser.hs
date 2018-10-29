@@ -22,7 +22,7 @@ parseColumnToLiquibaseString (Column t n c _ _) = "\t\t\t\t\t\t\t\t\t- column:\n
   ++ "\t\t\t\t\t\t\t\t\t\t\tname: " ++ unpack n ++ "\n"
   ++ "\t\t\t\t\t\t\t\t\t\t\ttype: varchar\n" ++ generateConstraintDefinitionLiquibaseString c
 
-generateConstraintDefinitionLiquibaseString :: Maybe [Text] -> String
+generateConstraintDefinitionLiquibaseString :: Maybe [Constraint] -> String
 generateConstraintDefinitionLiquibaseString constraints =
   case constraints of
     Nothing -> ""

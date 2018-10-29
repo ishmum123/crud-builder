@@ -15,7 +15,7 @@ spec :: Spec
 spec = describe "FileParserSpec" $ do
 
   describe "parseFile" $ do
-    it "parseFiles files correctly" $ do
+    it "parses files correctly" $ do
       dir <- getCurrentDirectory
       parseFile (dir ++ "/test/resources/random.txt") `shouldReturn` "\"hello\""
 
@@ -25,12 +25,12 @@ spec = describe "FileParserSpec" $ do
       database <- parseFile (dir ++ "/test/resources/database.json")
       parseDatabaseFromString database
         `shouldBe` Database {tables=[
-                        Table {ttype="entity", tname="user", columns=[
-                          Column {ctype="string", cname="name", constraints=Nothing, cdefault=Nothing, max=Nothing},
-                           Column {ctype="string", cname="email", constraints=Nothing, cdefault=Nothing, max=Nothing}
+                        Table {ttype=Entity, tname="user", columns=[
+                          Column {ctype=CString, cname="name", constraints=Nothing, cdefault=Nothing, max=Nothing},
+                           Column {ctype=CString, cname="email", constraints=Nothing, cdefault=Nothing, max=Nothing}
                           ]},
-                        Table {ttype="enum", tname="status", columns=[
-                          Column {ctype="string", cname="name", constraints=Nothing, cdefault=Nothing, max=Just 10}
+                        Table {ttype=Enum, tname="status", columns=[
+                          Column {ctype=CString, cname="name", constraints=Nothing, cdefault=Nothing, max=Just 10}
                           ]}
                        ],
                        relations=Just [Relation {referer="user.status", referenced="status"}]}
@@ -42,14 +42,14 @@ spec = describe "FileParserSpec" $ do
 
   describe "parseColumnToLiquibaseString" $ do
     it "generates liquibase column data from a Table" $ do
-      parseColumnToLiquibaseString Column {ctype="string", cname="email", constraints=Nothing, cdefault=Nothing, max=Nothing}
+      parseColumnToLiquibaseString Column {ctype=CString, cname="email", constraints=Nothing, cdefault=Nothing, max=Nothing}
         `shouldBe` "\t\t\t\t\t\t\t\t\t- column:\n\
         \\t\t\t\t\t\t\t\t\t\t\tname: email\n\
         \\t\t\t\t\t\t\t\t\t\t\ttype: varchar\n"
 
   describe "generateConstraintDefinitionLiquibaseString" $ do
     it "generates liquibase description of constraint definitions" $ do
-      generateConstraintDefinitionLiquibaseString (Just ["unique", "non-null"])
+      generateConstraintDefinitionLiquibaseString (Just [Unique, Required])
         `shouldBe` "\t\t\t\t\t\t\t\t\t\t\tconstraints:\n\
         \\t\t\t\t\t\t\t\t\t\t\t\tunique: true\n\
         \\t\t\t\t\t\t\t\t\t\t\t\tnullable: false\n"
