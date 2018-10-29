@@ -4,7 +4,7 @@ module CrudBuilder.FileParserSpec where
 
 import Prelude hiding (max)
 import System.Directory (getCurrentDirectory)
-import Data.Text (pack)
+import System.FilePath ((</>))
 import Test.Hspec (shouldBe, shouldReturn, shouldThrow, errorCall, Spec, it, describe)
 import Control.Exception (evaluate)
 
@@ -12,17 +12,24 @@ import CrudBuilder.FileParser
 import CrudBuilder.Model
 
 spec :: Spec
-spec = describe "FileParserSpec" $ do
+spec = describe "FileParser" $ do
 
   describe "parseFile" $ do
     it "parses files correctly" $ do
       dir <- getCurrentDirectory
-      parseFile (dir ++ "/test/resources/random.txt") `shouldReturn` "\"hello\""
+      parseFile (dir </> "test" </> "resources" </> "random.txt") `shouldReturn` "        \"hello\"\n"
+
+  describe "writeToFile" $ do
+    it "writes to files correctly" $ do
+      dir <- getCurrentDirectory
+      let testFile = dir </> "test" </> "out" </> "test.txt"
+      writeToFile testFile "        \"hello\"\n"
+      parseFile testFile `shouldReturn` "        \"hello\"\n"
 
   describe "parseDatabaseFromString" $ do
     it "parses database json correctly" $ do
       dir <- getCurrentDirectory
-      database <- parseFile (dir ++ "/test/resources/database.json")
+      database <- parseFile (dir </> "test" </> "resources" </> "database.json")
       parseDatabaseFromString database
         `shouldBe` Database {tables=[
                         Table {ttype=Entity, tname="user", columns=[
@@ -37,19 +44,19 @@ spec = describe "FileParserSpec" $ do
 
     it "throws exception when given malformed json" $ do
       dir <- getCurrentDirectory
-      malformedData <- parseFile (dir ++ "/test/resources/database.json.malformed")
+      malformedData <- parseFile (dir </> "test" </> "resources" </> "database.json.malformed")
       evaluate (parseDatabaseFromString malformedData) `shouldThrow` errorCall "Invalid Database Structure"
 
   describe "parseColumnToLiquibaseString" $ do
     it "generates liquibase column data from a Table" $ do
       parseColumnToLiquibaseString Column {ctype=CString, cname="email", constraints=Nothing, cdefault=Nothing, max=Nothing}
-        `shouldBe` "\t\t\t\t\t\t\t\t\t- column:\n\
-        \\t\t\t\t\t\t\t\t\t\t\tname: email\n\
-        \\t\t\t\t\t\t\t\t\t\t\ttype: varchar\n"
+        `shouldBe` "                                    - column:\n\
+        \                                            name: email\n\
+        \                                            type: varchar\n"
 
   describe "generateConstraintDefinitionLiquibaseString" $ do
     it "generates liquibase description of constraint definitions" $ do
       generateConstraintDefinitionLiquibaseString (Just [Unique, Required])
-        `shouldBe` "\t\t\t\t\t\t\t\t\t\t\tconstraints:\n\
-        \\t\t\t\t\t\t\t\t\t\t\t\tunique: true\n\
-        \\t\t\t\t\t\t\t\t\t\t\t\tnullable: false\n"
+        `shouldBe` "                                            constraints:\n\
+        \                                                unique: true\n\
+        \                                                nullable: false\n"
